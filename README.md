@@ -33,7 +33,7 @@ This system automates the analysis of customer service calls by:
 - **Docker**: Containerization and deployment
 
 ### AI/ML Components
-- **Google Gemini Pro**: Advanced language model for call classification
+- **gemini-2.0-flash-001 Model**: Advanced language model for call classification
 - **Silero VAD**: State-of-the-art voice activity detection
 - **PyTorch & TorchAudio**: Audio processing and deep learning operations
 - **SpeechRecognition**: Google Speech-to-Text integration for transcription
