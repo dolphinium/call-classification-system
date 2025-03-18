@@ -1,0 +1,52 @@
+version: "3.9"
+
+services:
+  mongo:
+    image: mongo:6.0
+    container_name: "my_mongo"
+    ports:
+      - "27017:27017"
+    restart: unless-stopped
+  redis:
+    image: "redis:6.2-alpine"
+    container_name: "test_redis"
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+
+  # app:
+  #   build: .
+  #   container_name: "test_app"
+  #   # This service runs the default CMD from Dockerfile (uvicorn).
+  #   # Alternatively we can specify explicitly:
+  #   # command: "uvicorn test_server:app --host 0.0.0.0 --port 8000"
+  #   ports:
+  #     - "8000:8000"
+  #   environment:
+  #     # Set any environment variables your code needs
+  #     - CELERY_BROKER_URL=redis://redis:6379/0
+  #     - CELERY_BACKEND_URL=redis://redis:6379/0
+  #   env_file:
+  #     - .env
+  #   depends_on:
+  #     - redis
+
+  celery_worker:
+    build: .
+    container_name: "celery_worker"
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_BACKEND_URL=redis://redis:6379/0
+    env_file:
+      - .env
+    depends_on:
+      - redis
+    command: >
+      sh -c "
+      celery -A celery_app.app beat --loglevel=info &
+      celery -A celery_app.app worker --loglevel=info
+      "
+    restart: unless-stopped
+    # Explanation:
+    #   - We run Celery Beat in the background (&) to handle periodic tasks
+    #   - Then we run Celery Worker in the foreground
